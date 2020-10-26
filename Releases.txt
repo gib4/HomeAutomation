@@ -1,0 +1,24 @@
+Revision 0.2.3 - 11th November 2017
+Fully Functional
+- door potentiometer
+- door button
+
+Revision 0.3.1 - 07 December 2017
+- added bluetooth serial support
+
+Revision 0.3.2 - 10 December 2017
+- fixed problem of bluetooth and analog sensors coexistance
+- Clap sensing in not operative
+
+Revision 0.3.3 - 23 January 2018
+- added WiFi support (still in developement)
+
+Revision 0.3.4 - 07 February 2018
+- Bluetooth Sensing on Serial2
+- WiFi sensing on Serial3 (beta)
+
+Revision 0.3.5 - 08 February 2018
+- before using the "selectiveToggle" function it has been added an all light off
+KNOWN ISSUES:
+- Before using Serial Bluetooth at a certain point the software will run into the "random toggle" state
+- Wi-fi arduino comm not working (Wi-fi not returning the right values to arduino)

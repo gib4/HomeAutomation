@@ -1,31 +1,41 @@
 /****************************************************************
  * lightModes.ccp - Library for different light modes	 		*
- * Created by D. Škerk, October 15, 2017				 		*
+ * Created by D. ï¿½kerk, October 15, 2017				 		*
  ****************************************************************/
 
 #include "../Headers/lightModes.h"
-#include "../Headers/mega2560_board.h"
+//#include "../Headers/mega2560_board.h"
 #include <Arduino.h>
-
 #include "../Headers/sensors.h"
-uint8_t toggleFlag=255;
 
+class Lights{
+	public:
+		void setRelayPin(int pin []);
+		void randomToggle (void);
+		void snakeToggle(void);
+		void selectiveToggle(uint8_t []);
+		void selectiveToggle(uint8_t, uint8_t);
+		void switchSequence(uint8_t);
+		void debugSerialPrint(uint8_t); // up to 8 flags can be selected
+	private:
+		int lightNum; 			// number of lights given the I/O pin array
+		int relayArr [];		// array containing the I/O pins
+};
+
+
+
+uint8_t toggleFlag=255;
 //PREBUILT LIGHT PATTERNS
 uint8_t lightsStateArray1 [] {0,0,1, 1,1,1, 0,1,1, 1,0,0};
-uint8_t lightsStateArray2 [] {0,0,1, 1,1,1, 0,1,1, 1,0,0};
-uint8_t lightsStateArray3 [] {0,0,1, 1,1,1, 0,1,1, 1,0,0};
-
-
-//METHODS
+uint8_t corners [] {1,0,0, 1,0,0, 1,0,0, 1,0,0};
 
 /********************************************************************************
- * switchModeCases(uint8_t)														*
- * 																				*
- * 		Description: Given an integer from 1 to 8 give the corresponding mode	*
- * 		Input: uint8_t from 1 to 8												*
- * 		Output:--																*
+ * switchModeCases(uint8_t)														
+ * 																				
+ * 		Description: Given an integer from 1 to 8 give the corresponding mode	
+ * 		Input: uint8_t from 1 to 8												
+ * 		Output:--																
  ********************************************************************************/
-
 void switchModeCases(uint8_t j) {
   delay(500);
   switch (j) {
@@ -33,15 +43,12 @@ void switchModeCases(uint8_t j) {
 	case ON:
 		relayToggle(0);
 		break;
-
 	case RANDOM:
 		randomToggle();
 		break;
-
 	case SNAKE:
 		snakeToggle();
 		break;
-
 	case OFF:
 		relayToggle(1);
 		break;
@@ -54,61 +61,70 @@ void switchModeCases(uint8_t j) {
 	case ALCOHOL:
 		selectiveToggle(lightsStateArray1);
 		break;
-	case SQC:
-		//selectiveToggle();
+	case DESK:
+		selectiveToggle();
 		break;
+	default:
+		relaytoggle(1);
   }
 }
 
 /********************************************************************************
- * switchSequence(uint8_t)														*
- * 																				*
- * 		Description: Given an integer turns sequentially the lights				*
- * 		Input: uint8_t															*
- * 		Output:--																*
+ *  setRelayArray ()															*
+ *  	Description: Sets the relay array with a while cycle. The relay pins 	*
+ *  				 MUST be in sequence										*
+ *  	Input:	--																*
+ *  	Output: --																*
  ********************************************************************************/
+void setRelayArray(int auxRelArr [])
+{
+	lightNum = sizeof(auxRelArr);
+	for(int el : auxRelArr)
+	{
+		relayArr[i] = el;
+	}
+}
 
+/********************************************************************************
+ * switchSequence(uint8_t)														
+ * 																				
+ * 		Description: Given an integer turns sequentially the lights	ON/OFF		
+ * 		Input: uint8_t															
+ * 		Output:--																
+ ********************************************************************************/
 void switchSequence(uint8_t j)
 {
 	uint8_t i = 1;
-	//lcd.print("Switch Sqc");
+	omniPrintln("Switch Sqc");
 	if (switchSequenceDebug == 0) Serial.print("	");
 	while (i <= RELAY_TOTAL_NUMBER)
 	{
-		if (i<j)
-			{
-			digitalWrite (RelayArray[i-1], LOW);
+		if (i<j) {
+			digitalWrite (relayArr[i-1], LOW);
 			if (switchSequenceDebug == 0)
-				{
 				Serial.print(String(i) +" ");
-				}
-			}
-		if (i>=j)
-			{
-			digitalWrite (RelayArray[i-1], HIGH);
-			if (switchSequenceDebug == 0)
-				{
+		}
+		if (i>=j) {
+			digitalWrite (relayArr[i-1], HIGH);
+			if (switchSequenceDebug == 0) 
 				Serial.print("- ");
-				}
-			}
+		}
 		i++;
 	}
 	if (switchSequenceDebug == 0) Serial.println();
 }
 
 /********************************************************************************
- * relayToggle(uint8_t)															*
- * 																				*
- * 		Description: Turns all 12 relay ON (0) or all OFF (1)  					*
- * 		Input: uint8_t 0 or 1													*
- * 		Output:--																*
+ * relayToggle(uint8_t)															
+ * 																				
+ * 		Description: Turns all n relay ON (0) or all OFF (1)  					
+ * 		Input: uint8_t 0 or 1													
+ * 		Output:--																
  ********************************************************************************/
-
 void relayToggle (uint8_t control){
 
 	//if true turn ON
-    if(control == 0)
-    {
+    if(control == 0) {
     	//lcd.print("All OFF");
         if(toggleFlag!=control) Serial.println ("All off");
     	//start FOR cycle that sequentially writes all relays value to HIGH
@@ -124,8 +140,7 @@ void relayToggle (uint8_t control){
     }
 
     //if false turn OFF
-    else if (control == 1)
-    {
+    else if (control == 1) {
     	//lcd.print("All ON");
     	if(toggleFlag!=control)Serial.println ("All on");
         //start FOR cycle that sequentially writes all relays value to LOW)
@@ -145,17 +160,15 @@ void relayToggle (uint8_t control){
  }
 
 /********************************************************************************
- * snakeToggle ()																*
- * 																				*
- * 		Description: Snake light method											*
- * 		Requirements: sensors.h													*
- * 		Input: --																*
- * 		Output:--																*
+ * snakeToggle ()																
+ * 																				
+ * 		Description: Snake light method											
+ * 		Requirements: sensors.h													
+ * 		Input: --																
+ * 		Output:--																
  ********************************************************************************/
-
 void snakeToggle(void){
   uint8_t i = 0;
-  //lcd.print("Snake started");
   omniPrintln ("Snake started");
   do{
 	  	int n = i - 2;
@@ -198,19 +211,17 @@ void snakeToggle(void){
 
   }
   while (potInteger(MODES_JUMP,NUMBER_OF_MODES, SINGLE_EDGE_DISCARD) == SNAKE || serialValue == SNAKE);
-  omniPrintln ("Snake stopped");
 }
 
 /********************************************************************************
-*randomToggle()																	*
-*																				*
-*	Description: Given an exit value "x", randomly toggles one relay at a time	*
-*	Input: --																	*
-*	Output: --																	*
+*randomToggle()																	
+*																				
+*	Description: Given an exit value "x", randomly toggles one relay at a time	
+*	Input: --																	
+*	Output: --																	
 *********************************************************************************/
 void randomToggle()
 {
-	//lcd.print("Random Toggle");
 	omniPrintln("Random Toggle Activated");
 	relayToggle(0);
 	do
@@ -233,11 +244,11 @@ void randomToggle()
 }
 
 /********************************************************************************
-*selectiveToggle(bool [])														*
-*																				*
-*	Description: Given an array of booleans, turns ON/OFF in case of 1/0		*
-*	Input: bool [RELAY_TOTAL_NUMBER] lightStateArray							*
-*	Output: --																	*
+*selectiveToggle(bool [])														
+*																				
+*	Description: Given an array of booleans, turns ON/OFF in case of 1/0		
+*	Input: bool [RELAY_TOTAL_NUMBER] lightStateArray							
+*	Output: --																	
 *********************************************************************************/
 void selectiveToggle(uint8_t localLightStateArray [])
 {

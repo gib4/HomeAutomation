@@ -18,11 +18,11 @@ char RelayArray[] = {0,0,0,0,0,0,0,0,0,0,0,0};
  *  	Output: --																*
  ********************************************************************************/
 
-void setRelayArray(char auxiliaryRelayArray [])
+void setRelayArray(char auxRelArr [])
 {
 	for(uint8_t i = 0; i<=RELAY_TOTAL_NUMBER; i++)
 	{
-		RelayArray[i] = auxiliaryRelayArray[i];
+		RelayArray[i] = auxRelArr[i];
 	}
 }
 

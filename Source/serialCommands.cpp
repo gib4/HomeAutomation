@@ -85,10 +85,6 @@ void printAvailableCommands()
 {
 	omniPrintln("Available serial commands:");
 	omniPrintln();
-	omniPrintln("Debug commands:");
-	omniPrintln("	tg1");
-//	omniPrintln("	sqc");
-	omniPrintln();
 	omniPrintln("General commands:");
 	omniPrintln("	on");
 	omniPrintln("	off");
@@ -97,23 +93,28 @@ void printAvailableCommands()
 	omniPrintln("	couch");
 	omniPrintln("	bed");
 	omniPrintln("	alcohol");
+	omniPrintln();
+	omniPrintln("Debug commands:");
+	omniPrintln("	dbgon");
+	omniPrintln("	tg1");
+//	omniPrintln("	sqc");
 }
 
 /********************************************************************************
- * boardPinInfoPrint(void)														*
+ * boardPin(void)														*
  * 																				*
  * 		Description: Prints all pins and their job			  					*
  * 		Input: --  																*
  * 		Output:--																*
  ********************************************************************************/
-void boardPinInfoPrint(void)
+void boardPin(void)
 {
 	omniPrintln("Hello, this is the board scheme:");
 	uint8_t i = 0;
 	while(i<=RELAY_ARRAY_MAX_VALUE)
 	{
 		//CONTROL
-		printf("/n Element is %c",RelayArray[i]);
+		printf("/n Element is %c",relayArr[i]);
 		i++;
 	}
 }

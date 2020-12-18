@@ -1,6 +1,6 @@
 /****************************************************************
  * lightModes.h - light modes header							*
- * Created by D. Škerk, October 15, 2017				 		*
+ * Created by D. ï¿½kerk, October 15, 2017				 		*
  ****************************************************************/
 
 #ifndef LIGHTMODES_H_
@@ -29,7 +29,7 @@
 	#define COUCH 	5
 	#define BED		6
 	#define ALCOHOL	7
-	#define SQC		8
+	#define DESK	8
 
 	#define SWITCH_MODE_CASES_NUMBER 8
 

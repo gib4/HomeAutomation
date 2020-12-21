@@ -7,78 +7,42 @@
 #define LIGHTMODES_H_
 
 #include <Arduino.h>
-#include "lightModes.h"
-#include "mega2560_board.h"
 #include "sensors.h"
 #include "serialCommands.h"
 
-//DEBUG values
-	#define relayToggleDebug 	1
-	#define randomToggleDebug 	1
-	#define snakeToggleDebug	1
-	#define switchSequenceDebug	1
-	#define selectiveRelayDebug	1
+class Lights{
+	public:
+		void setRelayPins(int []);
+		void delayInit(int, int, int);
+		void randomToggle ();
+		void snakeToggle();
+		void selectiveToggle(uint8_t []);
+		void selectiveToggle(uint8_t, uint8_t);
+		void switchSequence(uint8_t);
+		
+		// Print 
+		void printAvailableCommands();
+		void debugSerialPrint(bool); // up to 8 flags can be selected
+		void omniPrint(String);
+		void omniPrintln(String);
+		void omniPrint(uint8_t);
+		void omniPrintln(uint8_t);
+		void boardPin ();
 
-/****************************************************************************************
- * switchModeCases(uint8_t)                                                          	*
- ****************************************************************************************/
-	#define ON 		1
-	#define RANDOM	2
-	#define SNAKE	3
-	#define OFF		4
-	#define COUCH 	5
-	#define BED		6
-	#define ALCOHOL	7
-	#define DESK	8
+		enum modes:{ON, RANDOM, SNAKE, OFF, COUCH, BED, ALCOHOL, DESK}
+		#define SWITCH_MODE_CASES_NUMBER 8
 
-	#define SWITCH_MODE_CASES_NUMBER 8
-
-/**************************************************************************************
- * snakeToggle()                                                              		  *
- **************************************************************************************/
-
-	#define PROGRESSION_DELAY		140
-	extern void snakeToggle(void);
-
-/**************************************************************************************
- * relayToggle                                                                        *
- **************************************************************************************/
-
-	#define DELAY_TOGGLE_SEQUENCE 	50
-	extern void relayToggle(uint8_t);
-
-/**************************************************************************************
- * randomToggle                                                                        *
- **************************************************************************************/
-	#define RANDOM_TOGGLE_ON_DELAY	170
-	extern void randomToggle(void);
-
-/*****************************************************************************************
- * Given an integer (j) the method selects the equivalent mode case                      *
- *****************************************************************************************/
-	#define MODES_JUMP			((MAX_BIT_VALUE+1)/NUMBER_OF_MODES)
-	extern void switchModeCases(uint8_t);
-
-/****************************************************************************************
- * relayToggle(uint8_t)																	*
- * 																						*
- * 		Description: Given an integer (j) the method turns on every led till the j one  *
- * 		Input: uint8_t from 0 to RELAY_ARRAY_MAX_VALUE									*
- * 		Output:--																		*
- ****************************************************************************************/
-	#define SEQ_JUMP			(MAX_BIT_VALUE/NUMBER_OF_RELAYS)
-	extern void switchSequence(uint8_t);
-
-/**************************************************************************************
- * selectiveToggle                                                                        *
- **************************************************************************************/
-	extern void selectiveToggle(uint8_t []);
-	extern void selectiveToggle(uint8_t, uint8_t);
-
-	//Patterns
-	extern uint8_t lightsStateArray1 [];
-	extern uint8_t lightsStateArray2 [];
-	extern uint8_t lightsStateArray3 [];
-
+	private:
+		extern int relayArr[];			// array containing the I/O pins
+		extern int lightNum; 			// number of lights given the I/O pin array
+		extern int delaySnake;
+		extern int delayRelay;
+		extern int delayRandom;
+		bool relayToggleDebug 	= false;
+		bool randomToggleDebug 	= false;
+		bool snakeToggleDebug	= false;
+		bool switchSequenceDebug	= false;
+		bool selectiveRelayDebug	= false;
+};
 
 #endif /*LIGHTMODES_H_ */

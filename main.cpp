@@ -18,6 +18,9 @@
 uint8_t state = HIGH;      // the current state of the output pin
 uint8_t previous = LOW;    // the previous reading from the input pin
 
+	 //DELAYS
+	 #define ANTI_RELAY_FLICKER_DELAY	500
+
 void setup()
 {
   	delay(ANTI_RELAY_FLICKER_DELAY);
@@ -33,7 +36,7 @@ void setup()
   	//printAvailableCommands(BLUETOOTH_TRX);
   	//lcd.begin (16, 2);
 	int light_array_pins [] = {23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45};
-	int input_array_pins [] = {53, A1};
+	int input_array_pins [] = {53, A1}; //button, potentiometer, A0 mic
   	//defines the PINs to INPUT or OUTPUT
   	for (auto el : light_array_pins){
 		pinMode(el,OUTPUT);
@@ -41,26 +44,54 @@ void setup()
   	for (auto el : input_array_pins){
 		pinMode(el,INPUT);
   	}
-//   pinMode(RELAY_1, OUTPUT);
-//   pinMode(RELAY_2, OUTPUT);
-//   pinMode(RELAY_3, OUTPUT);
-//   pinMode(RELAY_4, OUTPUT);
-//   pinMode(RELAY_5, OUTPUT);
-//   pinMode(RELAY_6, OUTPUT);
-//   pinMode(RELAY_7, OUTPUT);
-//   pinMode(RELAY_8, OUTPUT);
-//   pinMode(RELAY_9, OUTPUT);
-//   pinMode(RELAY_10, OUTPUT);
-//   pinMode(RELAY_11, OUTPUT);
-//   pinMode(RELAY_12, OUTPUT);
-//   pinMode(MIC_PIN, INPUT);         	//defines Microphone as INPUT
-//   pinMode(BUTTON_PIN, INPUT);      	//defines Button
-//   pinMode(POT_PIN, INPUT);         	//defines Potentiometer as INPUT
-//   char myRelayArray [] = {RELAY_1,RELAY_2,RELAY_3,RELAY_4,RELAY_5,RELAY_6,
-// 		  	  	  	RELAY_7,RELAY_8, RELAY_9, RELAY_10,RELAY_11,RELAY_12};
-  setRelayArray(light_array_pins);
-  relayToggle(0);					//in case of a reset assures that
-  	  	  	  	  	  	  	  	  	//the lights won't turn on themselves
+
+	setRelayArray(light_array_pins);
+	relayToggle(0);					//in case of a reset assures that
+										//the lights won't turn on themselves
+}
+
+//PREBUILT LIGHT PATTERNS
+uint8_t lightsStateArray1 [] {0,0,1, 1,1,1, 0,1,1, 1,0,0};
+uint8_t corners [] {1,0,0, 1,0,0, 1,0,0, 1,0,0};
+
+/********************************************************************************
+ * switchModeCases(uint8_t)														
+ * 																				
+ * 		Description: Given an integer from 1 to 8 give the corresponding mode	
+ * 		Input: uint8_t from 1 to 8												
+ * 		Output:--																
+ ********************************************************************************/
+void switchModeCases(uint8_t j) {
+  delay(500);
+  switch (j) {
+
+	case ON:
+		relayToggle(0);
+		break;
+	case RANDOM:
+		randomToggle();
+		break;
+	case SNAKE:
+		snakeToggle();
+		break;
+	case OFF:
+		relayToggle(1);
+		break;
+	case COUCH:
+		selectiveToggle(8,10);
+		break;
+	case BED:
+		selectiveToggle(6,7);
+		break;
+	case ALCOHOL:
+		selectiveToggle(lightsStateArray1);
+		break;
+	case DESK:
+		selectiveToggle();
+		break;
+	default:
+		relaytoggle(1);
+  }
 }
 
 void loop ()
@@ -68,7 +99,7 @@ void loop ()
 	//DOOR BUTTON
 	uint8_t buttonStateControl = doorButtonRead();
 
-	if (serialFlag == false && clapFlag == false)
+	if (serialFlag == false)
 	{
 		if (buttonStateControl == 0)
 		{

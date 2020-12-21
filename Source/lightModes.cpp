@@ -4,79 +4,39 @@
  ****************************************************************/
 
 #include "../Headers/lightModes.h"
-//#include "../Headers/mega2560_board.h"
 #include <Arduino.h>
 #include "../Headers/sensors.h"
 
-class Lights{
-	public:
-		void setRelayPin(int pin []);
-		void randomToggle (void);
-		void snakeToggle(void);
-		void selectiveToggle(uint8_t []);
-		void selectiveToggle(uint8_t, uint8_t);
-		void switchSequence(uint8_t);
-		void debugSerialPrint(uint8_t); // up to 8 flags can be selected
-	private:
-		int lightNum; 			// number of lights given the I/O pin array
-		int relayArr [];		// array containing the I/O pins
-};
-
-
 
 uint8_t toggleFlag=255;
-//PREBUILT LIGHT PATTERNS
-uint8_t lightsStateArray1 [] {0,0,1, 1,1,1, 0,1,1, 1,0,0};
-uint8_t corners [] {1,0,0, 1,0,0, 1,0,0, 1,0,0};
+	#define SEQ_JUMP			(MAX_BIT_VALUE/NUMBER_OF_RELAYS)
+	#define MODES_JUMP			((MAX_BIT_VALUE+1)/NUMBER_OF_MODES)
 
-/********************************************************************************
- * switchModeCases(uint8_t)														
- * 																				
- * 		Description: Given an integer from 1 to 8 give the corresponding mode	
- * 		Input: uint8_t from 1 to 8												
- * 		Output:--																
- ********************************************************************************/
-void switchModeCases(uint8_t j) {
-  delay(500);
-  switch (j) {
-
-	case ON:
-		relayToggle(0);
-		break;
-	case RANDOM:
-		randomToggle();
-		break;
-	case SNAKE:
-		snakeToggle();
-		break;
-	case OFF:
-		relayToggle(1);
-		break;
-	case COUCH:
-		selectiveToggle(8,10);
-		break;
-	case BED:
-		selectiveToggle(6,7);
-		break;
-	case ALCOHOL:
-		selectiveToggle(lightsStateArray1);
-		break;
-	case DESK:
-		selectiveToggle();
-		break;
-	default:
-		relaytoggle(1);
-  }
+Lights(){
+	delaySnake = 140;
+	delayRelay = 50;
+	delayRandom = 170;
 }
 
 /********************************************************************************
- *  setRelayArray ()															*
- *  	Description: Sets the relay array with a while cycle. The relay pins 	*
- *  				 MUST be in sequence										*
- *  	Input:	--																*
- *  	Output: --																*
+ *  delayInit (snakeDelay, relayDelay, randomDelay)
+ *  	Description: set the delay for each light mode
+ *  	Input:	int, int, int
+ *  	Output: --
  ********************************************************************************/
-void setRelayArray(int auxRelArr [])
+delayInit(int snake, int relay, int random){
+	delaySnake = snake;
+	delayRelay = relay;
+	delayRandom = random;
+}
+
+/********************************************************************************
+ *  setRelayPins (array)
+ *  	Description: Sets the relay pins
+ *  	Input:	int [ ]
+ *  	Output: --
+ ********************************************************************************/
+void setRelayPins(int auxRelArr [])
 {
 	lightNum = sizeof(auxRelArr);
 	for(int el : auxRelArr)
@@ -86,11 +46,99 @@ void setRelayArray(int auxRelArr [])
 }
 
 /********************************************************************************
- * switchSequence(uint8_t)														
- * 																				
- * 		Description: Given an integer turns sequentially the lights	ON/OFF		
- * 		Input: uint8_t															
- * 		Output:--																
+* omniPrint(msg)
+* 		Description: Prints text to all serial devices (PC, Bluetooth etc.)
+* 		Input: String or uint8_t
+* 		Output:--
+********************************************************************************/
+void omniPrint(String msg)
+{
+	Serial.print (msg);
+	Serial1.print (msg);
+	Serial2.print (msg);
+	//Serial3.print (msg);
+}
+
+void omniPrint(uint8_t msg)
+{
+	Serial.print (msg);
+	Serial1.print (msg);
+	Serial2.print (msg);
+	//Serial3.print (msg);
+}
+
+/********************************************************************************
+* omniPrintln(msg)
+*
+* 		Description: Prints text to all serial devices (PC, Bluetooth etc.)
+* 		Input: String or uint8_t
+* 		Output:--
+********************************************************************************/
+void omniPrintln(String msg)
+{
+	Serial.println (msg);
+	Serial1.println (msg);
+	Serial2.println (msg);
+	//Serial3.println (msg);
+}
+
+void omniPrintln()
+{
+	Serial.println ();
+	Serial1.println ();
+	Serial2.println ();
+	//Serial3.println ();
+}
+
+/********************************************************************************
+ * printAvailableCommands(void)						
+ * 		Description: Prints all available serial commands
+ * 		Input: --
+ * 		Output:--
+ ********************************************************************************/
+void printAvailableCommands()
+{
+	omniPrintln("Available serial commands:");
+	omniPrintln();
+	omniPrintln("General commands:");
+	omniPrintln("	1 - on");
+	omniPrintln("	2 - random");
+	omniPrintln("	3 - snake");
+	omniPrintln("	4 - off");
+	omniPrintln("	5 - couch");
+	omniPrintln("	6 - bed");
+	omniPrintln("	7 - alcohol");
+	omniPrintln("	8 - desk");
+	omniPrintln();
+	omniPrintln("Debug commands:");
+	omniPrintln("	dbgON");
+	omniPrintln("	dbgOFF");
+	omniPrintln("	tg1");
+//	omniPrintln("	sqc");
+}
+
+/********************************************************************************
+ * boardPin(void)
+ * 		Description: Prints all pins and their job
+ * 		Input: --
+ * 		Output:--
+ ********************************************************************************/
+void boardPin(void)
+{
+	omniPrintln("This is the board scheme:");
+	for (auto el: relayArray)
+	{
+		omniPrint(el);
+		omniPrint(" ");
+	}
+	omniPrintln();
+}
+
+/********************************************************************************
+ * switchSequence(uint8_t)
+ * 		Description: Given an integer turns sequentially the lights	ON/OFF
+ * 		Input: uint8_t
+ * 		Output:--
  ********************************************************************************/
 void switchSequence(uint8_t j)
 {
@@ -115,11 +163,10 @@ void switchSequence(uint8_t j)
 }
 
 /********************************************************************************
- * relayToggle(uint8_t)															
- * 																				
- * 		Description: Turns all n relay ON (0) or all OFF (1)  					
- * 		Input: uint8_t 0 or 1													
- * 		Output:--																
+ * relayToggle(uint8_t)
+ * 		Description: Turns all n relay ON (0) or all OFF (1)
+ * 		Input: uint8_t 0 or 1
+ * 		Output:--
  ********************************************************************************/
 void relayToggle (uint8_t control){
 
@@ -215,32 +262,30 @@ void snakeToggle(void){
 
 /********************************************************************************
 *randomToggle()																	
-*																				
-*	Description: Given an exit value "x", randomly toggles one relay at a time	
-*	Input: --																	
-*	Output: --																	
+*	Description: Given an exit value "x", randomly toggles one relay at a 
+*	Input: --
+*	Output: --
 *********************************************************************************/
 void randomToggle()
 {
 	omniPrintln("Random Toggle Activated");
 	relayToggle(0);
-	do
-	{
-	  int r = random(RELAY_ARRAY_MIN_VALUE,RELAY_ARRAY_MAX_VALUE+1);
-	  digitalWrite (RelayArray[r], LOW);
-	  if (randomToggleDebug==0)
-	  {
-		  Serial.println("	ON - " + String(r+1) + "	" +
-				  analogRead(POT_PIN)+"	" +
-				  potInteger(MODES_JUMP,NUMBER_OF_MODES,SINGLE_EDGE_DISCARD));
-	  }
-	  delay(RANDOM_TOGGLE_ON_DELAY);
-	  digitalWrite (RelayArray[r], HIGH);
-	  bluetoothCheck();
-	  delay(10);
+	do {
+		int r = random(0,lightNum);
+		digitalWrite (relayArr[r], LOW);
+		if (randomToggleDebug==0)
+		{
+			Serial.println("	ON - " + String(r+1) + "	" +
+					analogRead(POT_PIN)+"	" +
+					potInteger(MODES_JUMP,NUMBER_OF_MODES,SINGLE_EDGE_DISCARD));
+		}
+		delay(delayRandom);
+		digitalWrite (relayArr[r], HIGH);
+		bluetoothCheck();
+		delay(10);
 	}
-	while (potInteger(MODES_JUMP,NUMBER_OF_MODES, SINGLE_EDGE_DISCARD) == RANDOM || serialValue == RANDOM);
-	omniPrintln("Random Toggle OFF");
+	while (potInteger(MODES_JUMP,NUMBER_OF_MODES, SINGLE_EDGE_DISCARD)== RANDOM...
+	|| serialValue == RANDOM);
 }
 
 /********************************************************************************
@@ -261,11 +306,10 @@ void selectiveToggle(uint8_t localLightStateArray [])
 }
 
 /********************************************************************************
-*selectiveToggle(firstOnLight,lastOnLight)										*
-*																				*
-*	Description: Given an array of booleans, turns ON/OFF in case of 1/0		*
-*	Input: (uint8_t,uint8_t)													*
-*	Output: --																	*
+*selectiveToggle(firstOnLight,lastOnLight)
+*	Description: Given an array of booleans, turns ON/OFF in case of 1/0
+*	Input: (uint8_t,uint8_t)
+*	Output: --
 *********************************************************************************/
 void selectiveToggle(uint8_t initial, uint8_t final)
 {
@@ -276,4 +320,19 @@ void selectiveToggle(uint8_t initial, uint8_t final)
 		else if	(i>=initial && i<=final)	digitalWrite(RelayArray[i],LOW);
 		else								digitalWrite(RelayArray[i],HIGH);
 	}
+}
+
+/********************************************************************************
+*debugSerialPrint(flag)
+*	Description: if flag is set to true will print debug values through all
+*				 serial ports
+*	Input: bool
+*	Output: --
+*********************************************************************************/
+void debugSerialPrint(bool dFlag){
+	bool relayToggleDebug 		= dFlag;
+	bool randomToggleDebug 		= dFlag;
+	bool snakeToggleDebug		= dFlag;
+	bool switchSequenceDebug	= dFlag;
+	bool selectiveRelayDebug	= dFlag;
 }
